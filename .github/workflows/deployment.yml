@@ -4,30 +4,29 @@ on:
   push:
     branches:
       - main
-    
+
 jobs:
   deploy:
-    runs-on: self-hosted 
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Deploy www 
+      - name: Install and Build www
         working-directory: ./www
         run: |
-          npm install 
+          npm install --verbose
           npm run build
-          pm2 restart fireman-www || pm2 start "bun run preview" --name fireman-www
 
-      - name: Verify Deployment
+      - name: Restart or Start Fireman WWW
         run: |
-          curl -f http://localhost:3000 || echo "www failed to start"
+          pm2 restart fireman-www || pm2 start "npm start" --name fireman-www
 
-
-        
-          
+      - name: Verify Fireman WWW Deployment
+        run: |
+          curl -f http://localhost:3000 || echo "fireman-www failed to start"

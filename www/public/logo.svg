@@ -1,0 +1,45 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Starburst/Sunburst design inspired by the reference image -->
+  <g>
+    <!-- Rays/Beams -->
+    <path d="M50 10 L50 30" stroke-width="6" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M50 70 L50 90" stroke-width="6" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M30 50 L10 50" stroke-width="6" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M90 50 L70 50" stroke-width="6" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    
+    <!-- Diagonal rays -->
+    <path d="M35 35 L20 20" stroke-width="6" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M65 35 L80 20" stroke-width="6" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M35 65 L20 80" stroke-width="6" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M65 65 L80 80" stroke-width="6" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    
+    <!-- Shorter diagonal rays -->
+    <path d="M42 30 L38 18" stroke-width="5" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M58 30 L62 18" stroke-width="5" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M30 42 L18 38" stroke-width="5" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M70 42 L82 38" stroke-width="5" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M30 58 L18 62" stroke-width="5" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M70 58 L82 62" stroke-width="5" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M42 70 L38 82" stroke-width="5" stroke-linecap="round" stroke="url(#rayGradient)"/>
+    <path d="M58 70 L62 82" stroke-width="5" stroke-linecap="round" stroke="url(#rayGradient)"/>
+  </g>
+  
+  <!-- Center circle with gradient -->
+  <circle cx="50" cy="50" r="15" fill="url(#centerGradient)"/>
+  
+  <!-- Gradient definitions -->
+  <defs>
+    <!-- Ray gradient -->
+    <linearGradient id="rayGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF7940"/>
+      <stop offset="50%" stop-color="#FF5C8D"/>
+      <stop offset="100%" stop-color="#5EA2FF"/>
+    </linearGradient>
+    
+    <!-- Center circle gradient -->
+    <linearGradient id="centerGradient" x1="35" y1="35" x2="65" y2="65" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F8F8F8"/>
+    </linearGradient>
+  </defs>
+</svg>

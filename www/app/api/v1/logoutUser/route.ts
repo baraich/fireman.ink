@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function GET(request: NextRequest) {
-  const isSecure = new URL(request.nextUrl).protocol === "https";
+  const isSecure =
+    new URL(request.headers.get("referer") || request.nextUrl).protocol ===
+    "https:";
   const cookiePrefix = isSecure ? "__Secure-" : "";
   const cookieName = cookiePrefix + "next-auth.session-token";
 

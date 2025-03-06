@@ -101,7 +101,11 @@ export default function ProjectPage() {
                             className="mt-2 p-4 rounded-lg bg-stone-800 language-properties"
                           >
                             <code
-                              className={`${ibmPlexMono.className} language-properties`}
+                              className={`language-properties`}
+                              style={{
+                                fontFamily:
+                                  ibmPlexMono.style.fontFamily + " !important",
+                              }}
                             >
                               {`php artisan serve`}
                             </code>

@@ -50,8 +50,8 @@ export default function ProjectPage() {
                 </div>
                 <div className="pl-13 text-white leading-7">
                   <p>
-                    I&quot;ll help you create a beautiful and functional todo
-                    application with React and TypeScript. We&quot;ll include
+                    I&apos;ll help you create a beautiful and functional todo
+                    application with React and TypeScript. We&apos;ll include
                     features like adding, completing, and deleting todos, along
                     with a clean UI using Tailwind CSS.
                   </p>

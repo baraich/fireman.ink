@@ -1,3 +1,4 @@
+import Header from "@/components/Header";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode } from "react";
@@ -14,38 +15,12 @@ export default function MainLayoutProps({ children }: MainLayoutProps) {
         <p className="text-amber-100 text-sm font-medium">
           <span className="font-bold mr-1">{"⚠️"} Development Preview:</span>
           This platform is in early development. Features may change and data
-          isn&quot;t permanently stored. Google authentication coming soon.
+          isn&apos;t permanently stored. Google authentication coming soon.
         </p>
       </div>
 
       {/* Header */}
-      <header className="flex justify-between items-center p-5 md:px-8 lg:px-12 border-b border-stone-800 sticky top-0 z-10 bg-[#0a0a0a]/95 backdrop-blur-md">
-        <Link href="/">
-          <div className="flex items-center">
-            <Image
-              src={"/logo.svg"}
-              alt="Fireman Logo"
-              width={32}
-              height={32}
-              className="mr-2"
-            />
-            <span className="font-bold text-xl">fireman</span>
-          </div>
-        </Link>
-
-        <div className="flex items-center space-x-3">
-          <Link href={"/signin"}>
-            <button className="px-5 py-3 rounded-full border-2 border-stone-700/40 hover:bg-gray-900 hover:cursor-pointer transition-colors text-sm font-medium">
-              Sign In
-            </button>
-          </Link>
-          <Link href={"/signup"}>
-            <button className="px-5 cursor-pointer py-3 rounded-full bg-white text-black hover:bg-gray-200 transform-colors text-sm font-medium">
-              Sign Up
-            </button>
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       {children}

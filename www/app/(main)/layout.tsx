@@ -9,6 +9,15 @@ interface MainLayoutProps {
 export default function MainLayoutProps({ children }: MainLayoutProps) {
   return (
     <div className="h-screen w-screen overflow-auto bg-[#0a0a0a] text-white flex flex-col">
+      {/* Development Warning Banner */}
+      <div className="bg-amber-900/80 border-b border-amber-700 p-4 text-center">
+        <p className="text-amber-100 text-sm font-medium">
+          <span className="font-bold mr-1">{"⚠️"} Development Preview:</span>
+          This platform is in early development. Features may change and data
+          isn&quot;t permanently stored. Google authentication coming soon.
+        </p>
+      </div>
+
       {/* Header */}
       <header className="flex justify-between items-center p-5 md:px-8 lg:px-12 border-b border-stone-800 sticky top-0 z-10 bg-[#0a0a0a]/95 backdrop-blur-md">
         <Link href="/">
@@ -30,9 +39,11 @@ export default function MainLayoutProps({ children }: MainLayoutProps) {
               Sign In
             </button>
           </Link>
-          <button className="px-5 cursor-pointer py-3 rounded-full bg-white text-black hover:bg-gray-200 transform-colors text-sm font-medium">
-            Sign Up
-          </button>
+          <Link href={"/signup"}>
+            <button className="px-5 cursor-pointer py-3 rounded-full bg-white text-black hover:bg-gray-200 transform-colors text-sm font-medium">
+              Sign Up
+            </button>
+          </Link>
         </div>
       </header>
 

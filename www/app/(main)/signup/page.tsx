@@ -54,7 +54,10 @@ export default function SignUp() {
           password: data.password,
           redirect: true,
         })) as { ok: boolean };
-        return typeof window !== "undefined" && (window.location.href = "/");
+        if (ok) {
+          if (typeof window !== "undefined") window.location.href = "/";
+          return;
+        } else return;
       }
 
       if (signInResponse?.status === "error") {

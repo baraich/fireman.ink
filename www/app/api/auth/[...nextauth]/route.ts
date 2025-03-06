@@ -34,7 +34,6 @@ const handler = NextAuth({
           .limit(1);
 
         if (user.length && user[0].password === credentials.password) {
-          console.log(user);
           return {
             id: user[0].id.toString(),
             email: user[0].email,

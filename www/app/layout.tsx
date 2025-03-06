@@ -2,8 +2,6 @@ import { ReactNode } from "react";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Metadata } from "next";
-import { SessionProvider } from "next-auth/react";
-import NextAuthProviderWrapper from "@/providers/NextAuthProviderWrappre";
 
 const poppins = Poppins({
   subsets: ["latin"],

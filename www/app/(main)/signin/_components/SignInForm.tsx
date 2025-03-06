@@ -38,9 +38,7 @@ export const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
         else setError("Internal Server Error: Please try again later.");
       }
 
-      if (ok) {
-        typeof window !== "undefined" && (window.location.href = "/");
-      }
+      if (ok) if (typeof window !== "undefined") window.location.href = "/";
     } catch (error) {
       if (error instanceof z.ZodError) {
         const issues = error.issues.map((issue) => issue.message);

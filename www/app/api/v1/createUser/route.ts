@@ -1,4 +1,5 @@
 import { db } from "@/db/drizzle";
+import { generateFromEmail } from "unique-username-generator";
 import { users } from "@/db/schema/users";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
       .values({
         email: data.email,
         password: data.password,
-        username: data.email.split("@")?.[0] || "",
+        username: generateFromEmail(data.email),
       })
       .returning()
       .execute();

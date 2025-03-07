@@ -151,7 +151,7 @@ export default async function ProjectPage({
           />
 
           {/* Browser Window UI */}
-          <div className="hidden xl:block max-h-[90vh] sticky top-2.5">
+          <div className="hidden xl:block max-h-[90vh] sticky top-5">
             <Browser
               address={
                 process.env.DEV

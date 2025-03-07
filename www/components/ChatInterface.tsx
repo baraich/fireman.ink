@@ -4,7 +4,6 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Prism from "prismjs";
 import Markdown from "react-markdown";
-import "prismjs/components/prism-php.min.js";
 
 /*
  * Constants from W3C SVG namespace specification
@@ -273,7 +272,7 @@ function UserMessage({ initials, msg }: { initials: string; msg: string }) {
 function AssistantMessage({ msg }: { msg: string }) {
   return (
     <div className="bg-[#161616] w-full rounded-lg p-6 border border-stone-800">
-      <div className="flex items-center p-3 mb-4">
+      <div className="flex items-center p-3 -mb-4">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-blue-500 flex items-center justify-center mr-4">
           <span className="text-white font-bold">A</span>
         </div>

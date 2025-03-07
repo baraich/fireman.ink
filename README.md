@@ -7,6 +7,8 @@
 
 - [x] **Project Creation**: Starts a sandboxed environment and links to the user. (Still, other than this no functionality is present.)
 
+- [x] **Preview**: To allowing viewing of the website.
+
 - [ ] **AI-Driven Code Generation**: Generate Laravel projects (controllers, models, views, migrations) from natural language prompts. 
 
 - [ ] **Browser Based IDE**: To enable edits to codebase from browser with real-time updates. 

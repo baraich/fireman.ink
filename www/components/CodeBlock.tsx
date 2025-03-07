@@ -5,7 +5,6 @@ import Prism from "prismjs";
 
 import "prismjs/themes/prism-tomorrow.min.css";
 import "prismjs/components/prism-properties";
-import "prismjs/components/prism-php";
 
 const ibmPlexMono = IBM_Plex_Mono({
   weight: ["400"],
@@ -19,7 +18,11 @@ interface CodeBlockProps {
 
 export default function CodeBlock({ code, language }: CodeBlockProps) {
   useEffect(function () {
-    Prism.highlightAll();
+    try {
+      Prism.highlightAll();
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
   return (

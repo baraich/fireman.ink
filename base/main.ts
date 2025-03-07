@@ -27,13 +27,6 @@ interface ProjectCreationResponse {
 }
 
 /*
- * Type definition for proxy route parameters
- */
-interface ProxyParams {
-  projectId: string;
-}
-
-/*
  * Configure dotenv to load environment variables
  */
 config({ path: ENV_FILE_PATH });
@@ -147,7 +140,11 @@ app.post("/api/send_message", async (request, response) => {
          * Subscribe to the 'thinking' event and stream updates
          */
         defaultFiremanAgent.subscribe("thinking", (thought: string) => {
-          if (subscriptionActive) {
+          if (
+            subscriptionActive &&
+            controller &&
+            controller.desiredSize !== null
+          ) {
             controller.enqueue(new TextEncoder().encode(thought));
           }
         });

@@ -8,7 +8,6 @@ import {
   ChevronDown,
   ChevronsLeftRightEllipsisIcon,
 } from "lucide-react";
-import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
 
 /*
@@ -21,7 +20,6 @@ interface ProjectPageProps {
 /*
  * Constants for routing and SVG namespace
  */
-const SIGNIN_PATH = "/signin";
 const LOGOUT_PATH = "/api/v1/logoutUser";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
@@ -34,6 +32,7 @@ const authenticateUser = async () => {
   try {
     return validateAndGetUser();
   } catch (error) {
+    console.log(error);
     redirect(LOGOUT_PATH);
   }
 };
@@ -70,6 +69,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const user = await authenticateUser();
   const { projectId } = await params;
   const project = await fetchProject(user.id, projectId);
+  console.log(project);
 
   return (
     <main className="flex-1 flex flex-col p-4 md:p-8">
@@ -100,8 +100,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
                 <div className="pl-13 text-white leading-7">
                   <p>
-                    I'll help you create a beautiful and functional todo
-                    application with React and TypeScript. We'll include
+                    I&apos;ll help you create a beautiful and functional todo
+                    application with React and TypeScript. We&apos;ll include
                     features like adding, completing, and deleting todos, along
                     with a clean UI using Tailwind CSS.
                   </p>

@@ -140,12 +140,17 @@ app.post("/api/send_message", async (request, response) => {
          * Subscribe to the 'thinking' event and stream updates
          */
         defaultFiremanAgent.subscribe("thinking", (thought: string) => {
-          if (
-            subscriptionActive &&
-            controller &&
-            controller.desiredSize !== null
-          ) {
-            controller.enqueue(new TextEncoder().encode(thought));
+          try {
+            if (
+              subscriptionActive &&
+              controller &&
+              controller.desiredSize !== null
+            ) {
+              controller.enqueue(new TextEncoder().encode(thought));
+            }
+          } catch (error) {
+            console.log(error);
+            controller.close();
           }
         });
 

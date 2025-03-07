@@ -3,6 +3,7 @@ import { users } from "@/db/schema/users";
 import { eq } from "drizzle-orm";
 import NextAuth, { NextAuthOptions, User } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { compareSync } from "bcrypt-edge";
 
 const handler = NextAuth({
   callbacks: {
@@ -27,17 +28,18 @@ const handler = NextAuth({
       authorize: async (credentials) => {
         if (!credentials) return null;
 
-        const user = await db
+        const [user] = await db
           .select()
           .from(users)
           .where(eq(users.email, credentials.email))
           .limit(1);
+        if (!user) return null;
 
-        if (user.length && user[0].password === credentials.password) {
+        if (compareSync(credentials.password, user.password)) {
           return {
-            id: user[0].id.toString(),
-            email: user[0].email,
-            name: user[0].username,
+            id: user.id.toString(),
+            email: user.email,
+            name: user.name,
           };
         }
         return null;

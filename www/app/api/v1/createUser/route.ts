@@ -1,54 +1,104 @@
 import { db } from "@/db/drizzle";
-import { generateFromEmail } from "unique-username-generator";
 import { users } from "@/db/schema/users";
 import { NextResponse } from "next/server";
-import { z } from "zod";
+import { z, ZodError } from "zod";
+import { genSaltSync, hashSync } from "bcrypt-edge";
+
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 32;
 
 const signUpSchema = z.object({
-  email: z
-    .string()
-    .email("Email must be a valid email format, e.g. 'email@example.com'"),
+  name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().email({ message: "Invalid email format" }),
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters long.")
-    .max(
-      32,
-      "Oh! What are you doing? Don't write a letter here, maximum allowed characters are 32."
-    ),
+    .min(PASSWORD_MIN_LENGTH, {
+      message: `Password must be at least ${PASSWORD_MIN_LENGTH} characters`,
+    })
+    .max(PASSWORD_MAX_LENGTH, {
+      message: `Password must not exceed ${PASSWORD_MAX_LENGTH} characters`,
+    }),
 });
 
-export async function POST(request: Request) {
-  try {
-    const data = signUpSchema.parse(await request.json());
-    const records = await db
-      .insert(users)
-      .values({
-        email: data.email,
-        password: data.password,
-        username: generateFromEmail(data.email),
-      })
-      .returning()
-      .execute();
+interface SignUpData {
+  name: string;
+  email: string;
+  password: string;
+}
 
-    if (records.length > 0) {
-      const user = records[0];
-      if (user?.id) {
-        return NextResponse.json({ status: "OK", userId: user.id });
-      }
+interface ApiResponse {
+  status: "OK" | "error";
+  userId?: string;
+  error?: string;
+}
+
+const hashPassword = (password: string): string => {
+  const salt = genSaltSync(10);
+  return hashSync(password, salt);
+};
+
+const createUser = async (data: SignUpData) => {
+  const hashedPassword = hashPassword(data.password);
+
+  const [user] = await db
+    .insert(users)
+    .values({
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+    })
+    .returning();
+
+  return user;
+};
+
+const formatZodErrors = (error: ZodError) => {
+  return error.issues.map((issue) => ({
+    [issue.path[0]]: issue.message,
+  }));
+};
+
+export async function POST(
+  request: Request
+): Promise<NextResponse<ApiResponse>> {
+  try {
+    const body = await request.json();
+    const validatedData = signUpSchema.parse(body);
+
+    const user = await createUser(validatedData);
+
+    if (!user?.id) {
+      throw new Error("Failed to create user");
     }
 
-    throw new Error("Failed to create user!");
+    return NextResponse.json(
+      {
+        status: "OK",
+        userId: user.id,
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      const issues = error.issues.map((issue) => ({
-        [issue.path[0]]: issue.message,
-      }));
+    if (error instanceof ZodError) {
+      const errors = formatZodErrors(error);
+      const errorMessage = Object.values(errors.shift() || {}).shift();
 
-      return NextResponse.json({
+      if (errorMessage)
+        return NextResponse.json(
+          {
+            status: "error",
+            error: errorMessage,
+          },
+          { status: 400 }
+        );
+    }
+
+    return NextResponse.json(
+      {
         status: "error",
-        error: issues,
-      });
-    } else console.log(error);
-    return NextResponse.json({ status: "error", error: null });
+        error: "Internal server error",
+      },
+      { status: 500 }
+    );
   }
 }

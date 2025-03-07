@@ -16,13 +16,9 @@ const signUpSchema = z.object({
       32,
       "Oh! What are you doing? Don't write a letter here, maximum allowed characters are 32."
     ),
-  c_password: z
+  name: z
     .string()
-    .min(8, "Password must be at least 8 characters long.")
-    .max(
-      32,
-      "Oh! What are you doing? Don't write a letter here, maximum allowed characters are 32."
-    ),
+    .min(1, "I know, you aren't nameless, please fill your name."),
 });
 
 export default function SignUp() {
@@ -35,11 +31,6 @@ export default function SignUp() {
 
     try {
       const data = signUpSchema.parse(payload);
-      if (data.password !== data.c_password) {
-        setError("Passwords do not match!");
-        return;
-      }
-
       const signUpRequest = await fetch("/api/v1/createUser", {
         method: "POST",
         headers: {
@@ -90,6 +81,25 @@ export default function SignUp() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
+            <div className="flex justify-between items-center mb-2">
+              <label
+                htmlFor="c_password"
+                className="block text-sm font-medium text-gray-300"
+              >
+                Name
+              </label>
+            </div>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-3 text-gray-300 focus:outline-none focus:border-gray-600"
+              placeholder="John Smith"
+              required
+            />
+          </div>
+
+          <div>
             <label
               htmlFor="email"
               className="block text-sm font-medium text-gray-300 mb-2"
@@ -123,26 +133,6 @@ export default function SignUp() {
               required
             />
           </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label
-                htmlFor="c_password"
-                className="block text-sm font-medium text-gray-300"
-              >
-                Confirm Password
-              </label>
-            </div>
-            <input
-              id="c_password"
-              name="c_password"
-              type="password"
-              className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-3 text-gray-300 focus:outline-none focus:border-gray-600"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
           <button
             type="submit"
             className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed mt-4"

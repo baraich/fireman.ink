@@ -1,6 +1,6 @@
 {
-  "id": "c52ad37a-ca51-47d5-9cd5-5e718ed31efe",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "9dcf7187-054e-48b0-8ed2-330f89d939f6",
+  "prevId": "c52ad37a-ca51-47d5-9cd5-5e718ed31efe",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -120,13 +120,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "users_name_unique": {
-          "name": "users_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        },
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,

@@ -2,48 +2,98 @@
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import z from "zod";
+import { z, ZodError } from "zod";
+
+const PASSWORD_MAX_LENGTH = 32;
+const REDIRECT_URL = "/";
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .email("Email must be a valid email format, e.g. 'email@example.com'"),
-  password: z
-    .string()
-    .max(
-      32,
-      "Oh! What are you doing? Don't write a letter here, maximum allowed characters are 32."
-    ),
+  email: z.string().email({
+    message: "Email must be a valid email format, e.g. 'email@example.com'",
+  }),
+  password: z.string().max(PASSWORD_MAX_LENGTH, {
+    message: `Maximum allowed characters are ${PASSWORD_MAX_LENGTH}`,
+  }),
 });
 
-export const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
+/*
+ * Type definition for form props
+ */
+interface SignInFormProps {
+  csrfToken: string;
+}
+
+/*
+ * Type definition for sign-in response from NextAuth
+ */
+interface SignInResponse {
+  error: string | null;
+  ok: boolean;
+}
+
+/*
+ * SignInForm component for handling user authentication
+ * @param csrfToken - CSRF token for security
+ */
+export const SignInForm = ({ csrfToken }: SignInFormProps) => {
+  /*
+   * State for error messages
+   */
   const [error, setError] = useState<string>("");
 
-  const handleSubmit = async function (event: FormEvent<HTMLFormElement>) {
+  /*
+   * Handles form submission and authentication
+   * @param event - Form submission event
+   */
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    /*
+     * Extract form data
+     */
     const formData = new FormData(event.target as HTMLFormElement);
     const payload = Object.fromEntries(formData);
 
     try {
+      /*
+       * Validate form data against schema
+       */
       const data = loginSchema.parse(payload);
 
-      const { error, ok } = (await signIn("credentials", {
+      /*
+       * Attempt to sign in with credentials
+       */
+      const response = (await signIn("credentials", {
         ...data,
         redirect: false,
-      })) as { error: string | null; ok: boolean };
+      })) as SignInResponse;
 
-      if (error) {
-        if (error == "CredentialsSignin")
-          setError("Invalid email or password!");
-        else setError("Internal Server Error: Please try again later.");
+      /*
+       * Handle authentication response
+       */
+      if (response.error) {
+        setError(
+          response.error === "CredentialsSignin"
+            ? "Invalid email or password"
+            : "Internal Server Error: Please try again later"
+        );
+        return;
       }
 
-      if (ok) if (typeof window !== "undefined") window.location.href = "/";
+      if (response.ok && typeof window !== "undefined") {
+        window.location.href = REDIRECT_URL;
+      }
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        const issues = error.issues.map((issue) => issue.message);
-        setError(issues.shift() || "");
-      } else console.log(error);
+      /*
+       * Handle validation and unexpected errors
+       */
+      if (error instanceof ZodError) {
+        const firstError = error.issues[0]?.message || "Validation error";
+        setError(firstError);
+      } else {
+        console.error("Sign-in error:", error);
+        setError("An unexpected error occurred");
+      }
     }
   };
 
@@ -69,6 +119,7 @@ export const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
             name="email"
             placeholder="you@domain.tld"
             className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-3 text-gray-300 focus:outline-none focus:border-gray-600"
+            required
           />
         </div>
 
@@ -81,7 +132,7 @@ export const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
               Password
             </label>
             <Link
-              href="#"
+              href="/forgot-password"
               className="text-xs text-blue-400 hover:text-blue-300"
             >
               Forgot password?

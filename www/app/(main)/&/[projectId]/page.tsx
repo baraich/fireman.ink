@@ -1,25 +1,75 @@
-"use client";
+import CodeBlock from "@/components/CodeBlock";
+import { db } from "@/db/drizzle";
+import { projects } from "@/db/schema/projects";
+import { validateAndGetUser } from "@/lib/validateAndGetUser";
+import { and, eq } from "drizzle-orm";
 import {
   Check,
   ChevronDown,
   ChevronsLeftRightEllipsisIcon,
 } from "lucide-react";
-import { IBM_Plex_Mono } from "next/font/google";
-import { useEffect } from "react";
-import Prism from "prismjs";
+import { getServerSession } from "next-auth";
+import { notFound, redirect } from "next/navigation";
 
-import "prismjs/themes/prism-tomorrow.min.css";
-import "prismjs/components/prism-properties";
+/*
+ * Type definition for component props
+ */
+interface ProjectPageProps {
+  params: Promise<{ projectId: string }>;
+}
 
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: ["400"],
-  subsets: ["latin"],
-});
+/*
+ * Constants for routing and SVG namespace
+ */
+const SIGNIN_PATH = "/signin";
+const LOGOUT_PATH = "/api/v1/logoutUser";
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
-export default function ProjectPage() {
-  useEffect(function () {
-    Prism.highlightAll();
-  }, []);
+/*
+ * Validates user authentication and retrieves user data
+ * @param redirectPath - Path to redirect if authentication fails
+ * @returns User object if authenticated
+ */
+const authenticateUser = async () => {
+  try {
+    return validateAndGetUser();
+  } catch (error) {
+    redirect(LOGOUT_PATH);
+  }
+};
+
+/*
+ * Fetches project data for the authenticated user
+ * @param userId - ID of the authenticated user
+ * @param projectId - ID of the project to fetch
+ * @returns Project object or triggers notFound
+ */
+const fetchProject = async (userId: string, projectId: string) => {
+  const [project] = await db
+    .select()
+    .from(projects)
+    .where(and(eq(projects.userId, userId), eq(projects.id, projectId)))
+    .limit(1)
+    .execute();
+
+  if (!project) {
+    notFound();
+  }
+
+  return project;
+};
+
+/*
+ * ProjectPage component displaying project details and interaction UI
+ * @param params - Dynamic route parameters including projectId
+ */
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  /*
+   * Authenticate user and fetch project data
+   */
+  const user = await authenticateUser();
+  const { projectId } = await params;
+  const project = await fetchProject(user.id, projectId);
 
   return (
     <main className="flex-1 flex flex-col p-4 md:p-8">
@@ -40,7 +90,7 @@ export default function ProjectPage() {
                 </div>
               </div>
 
-              {/* Asssitant Message */}
+              {/* Assistant Message */}
               <div className="bg-[#161616] rounded-lg p-4 border border-stone-800">
                 <div className="flex items-center p-2">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-blue-500 flex items-center justify-center mr-3">
@@ -50,8 +100,8 @@ export default function ProjectPage() {
                 </div>
                 <div className="pl-13 text-white leading-7">
                   <p>
-                    I&apos;ll help you create a beautiful and functional todo
-                    application with React and TypeScript. We&apos;ll include
+                    I'll help you create a beautiful and functional todo
+                    application with React and TypeScript. We'll include
                     features like adding, completing, and deleting todos, along
                     with a clean UI using Tailwind CSS.
                   </p>
@@ -76,13 +126,13 @@ export default function ProjectPage() {
                     <li>
                       <div className="flex gap-2">
                         <Check className="text-teal-600" />
-                        <span>Create Inital Files</span>
+                        <span>Create Initial Files</span>
                       </div>
                     </li>
                     <li>
                       <div className="flex gap-2">
                         <Check className="text-teal-600" />
-                        <span>Install Dependanciees</span>
+                        <span>Install Dependencies</span>
                       </div>
                     </li>
                     <li>
@@ -92,24 +142,10 @@ export default function ProjectPage() {
                           <p>Starting Server</p>
                         </div>
                         <div>
-                          <pre
-                            tabIndex={0}
-                            style={{
-                              backgroundColor:
-                                "var(--color-stone-800) !important",
-                            }}
-                            className="mt-2 p-4 rounded-lg bg-stone-800 language-properties"
-                          >
-                            <code
-                              className={`language-properties`}
-                              style={{
-                                fontFamily:
-                                  ibmPlexMono.style.fontFamily + " !important",
-                              }}
-                            >
-                              {`php artisan serve`}
-                            </code>
-                          </pre>
+                          <CodeBlock
+                            language="properties"
+                            code="php artisan serve"
+                          />
                         </div>
                       </div>
                     </li>
@@ -128,7 +164,7 @@ export default function ProjectPage() {
               />
               <button className="absolute right-5 bottom-5 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 shadow-lg transition-colors">
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns={SVG_NAMESPACE}
                   width="20"
                   height="20"
                   viewBox="0 0 24 24"
@@ -138,8 +174,8 @@ export default function ProjectPage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
                 </svg>
               </button>
             </div>

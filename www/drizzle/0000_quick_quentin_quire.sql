@@ -1,21 +1,21 @@
 CREATE TABLE "projects" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"user_id" serial NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text,
+	"container_id" text NOT NULL,
 	"name" text NOT NULL,
 	"description" text NOT NULL,
 	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp,
-	"deleted_at" timestamp
+	"updated_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"username" text NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
 	"email" text NOT NULL,
 	"password" text NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp,
-	CONSTRAINT "users_username_unique" UNIQUE("username"),
+	CONSTRAINT "users_name_unique" UNIQUE("name"),
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint

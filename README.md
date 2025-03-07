@@ -3,11 +3,13 @@
 **Fireman** is an innovative, AI-powered platform designed to create, edit and run PHP-Laravel applications. _Fireman_ is designed to be a competitor to [Bolt.new](https://bolt.new/).
 
 ## Features
+- [x] **User Authentication**: Ability to create and login into accounts.
+
+- [x] **Project Creation**: Starts a sandboxed environment and links to the user. (Still, other than this no functionality is present.)
+
 - [ ] **AI-Driven Code Generation**: Generate Laravel projects (controllers, models, views, migrations) from natural language prompts. 
 
 - [ ] **Browser Based IDE**: To enable edits to codebase from browser with real-time updates. 
-
-- [ ] **Previews**: _self-explanatory_
 
 > **Cost-Effectiveness**: We are trying to keep the costs as minimal as possible while providing quality to the users using the platform.
 

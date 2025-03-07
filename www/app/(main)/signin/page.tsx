@@ -18,7 +18,7 @@ export default async function SignIn() {
         <SignInForm csrfToken={csrfToken || ""} />
 
         <div className="mt-8 text-center text-sm text-gray-400">
-          Don&apos;t have an account?{" "}
+          Don't have an account?{" "}
           <Link
             href="/signup"
             className="text-blue-400 hover:text-blue-300 font-medium"

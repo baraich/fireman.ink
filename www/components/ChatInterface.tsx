@@ -163,7 +163,8 @@ export default function ChatInterface({
     if (newConversation && q) {
       sendMessage(q);
     }
-  }, [initialMessages, newConversation, q, sendMessage]);
+    // eslint-disable-next-line
+  }, [initialMessages, newConversation, q]);
 
   useEffect(
     function () {

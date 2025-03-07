@@ -91,8 +91,7 @@ export async function POST(): Promise<NextResponse> {
      */
     return NextResponse.json(
       {
-        internalProjectId: project.id,
-        projectId: projectDetails.container.containerId,
+        projectId: project.id,
         application: {
           port: projectDetails.container.port,
         },

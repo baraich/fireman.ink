@@ -48,9 +48,7 @@ const fetchProject = async (userId: string, projectId: string) => {
   const [project] = await db
     .select()
     .from(projects)
-    .where(
-      and(eq(projects.userId, userId), eq(projects.containerId, projectId))
-    )
+    .where(and(eq(projects.userId, userId), eq(projects.id, projectId)))
     .limit(1)
     .execute();
 
@@ -190,9 +188,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           {/* Browser Window UI */}
           <div className="hidden xl:block">
             <Browser
-              address={`${project.containerId}.${
+              address={`https://${project.id}.${
                 new URL(process.env.NEXTAUTH_URL!).host
-              }`}
+              }/`}
             />
           </div>
         </div>

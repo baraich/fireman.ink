@@ -85,7 +85,7 @@ export default function Browser(options: BrowserProps) {
         </div>
 
         {/* Browser Content (iframe) */}
-        <div className="flex-1 bg-white overflow-x-hidden">
+        <div className="flex-1 bg-white">
           <iframe
             src={options.address}
             className="w-full h-screen border-none"

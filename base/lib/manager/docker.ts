@@ -97,4 +97,17 @@ export class ProjectManager {
       throw new Error(errorMessage);
     }
   }
+
+  /*
+   * Retrieves a Docker container by its container ID
+   * @param containerId - ID of the container to retrieve
+   * @returns Container object or null if not found
+   */
+  getContainer(containerId: string): Container | null {
+    try {
+      return this.docker.getContainer(containerId);
+    } catch (error) {
+      throw error;
+    }
+  }
 }

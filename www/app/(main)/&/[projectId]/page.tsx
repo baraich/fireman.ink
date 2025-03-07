@@ -47,7 +47,9 @@ const fetchProject = async (userId: string, projectId: string) => {
   const [project] = await db
     .select()
     .from(projects)
-    .where(and(eq(projects.userId, userId), eq(projects.id, projectId)))
+    .where(
+      and(eq(projects.userId, userId), eq(projects.containerId, projectId))
+    )
     .limit(1)
     .execute();
 

@@ -1,5 +1,4 @@
 import Browser from "@/components/Browser";
-import ChatInterface from "@/components/ChatInterface";
 import { db } from "@/db/drizzle";
 import { messages } from "@/db/schema/messages";
 import { projects } from "@/db/schema/projects";
@@ -8,6 +7,7 @@ import { and, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { toast } from "sonner";
 import "./_css/code.css";
+import ChatIntefaceLoader from "@/components/ChatInterfaceLoader";
 
 /*
  * Type definition for component props
@@ -141,7 +141,7 @@ export default async function ProjectPage({
       <div className="lg:min-w-6xl mx-auto w-full">
         <div className="flex justify-between gap-4">
           {/* Chat Interface */}
-          <ChatInterface
+          <ChatIntefaceLoader
             messages={messages || []}
             userId={user.id}
             initials={user.name.charAt(0).toUpperCase()}

@@ -4,10 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Prism from "prismjs";
 import Markdown from "react-markdown";
-
-import languageLoader from "prismjs/components/index";
-
-languageLoader(["php"]);
+import "prismjs/components/prism-php.min.js";
 
 /*
  * Constants from W3C SVG namespace specification

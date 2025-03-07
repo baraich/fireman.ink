@@ -191,7 +191,7 @@ export default async function ProjectPage({
           </div>
 
           {/* Browser Window UI */}
-          <div className="hidden xl:block max-h-[85vh]">
+          <div className="hidden xl:block max-h-[90vh]">
             <Browser
               address={
                 process.env.DEV

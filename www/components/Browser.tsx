@@ -34,7 +34,7 @@ export default function Browser(options: BrowserProps) {
 
   return (
     <div className="sticky top-2.5" ref={browserContainerElementRef}>
-      <div className="bg-[#111111] max-w-full rounded-lg overflow-hidden border border-stone-800 shadow-lg flex flex-col h-[79vh]">
+      <div className="bg-[#111111] max-w-full rounded-lg overflow-hidden border border-stone-800 shadow-lg flex flex-col h-[90vh]">
         {/* Browser Header */}
         <div className="border-b border-stone-800 p-3 flex flex-col space-y-2">
           {/* Browser Controls */}

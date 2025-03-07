@@ -1,7 +1,9 @@
 {
   "name": "@fireman/base",
   "dependencies": {
+    "@ai-sdk/anthropic": "^1.1.15",
     "@neondatabase/serverless": "^0.10.4",
+    "@tailwindcss/typography": "^0.5.16",
     "@types/dockerode": "^3.3.35",
     "@types/express": "^5.0.0",
     "@types/http-proxy": "^1.17.16",

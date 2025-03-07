@@ -8,6 +8,8 @@ interface BrowserProps {
 }
 
 const slideIn = (element: HTMLDivElement) => {
+  setTimeout(() => element.classList.remove("hidden"), 1000);
+
   const timeline = gsap.timeline();
   timeline
     .set(element, {
@@ -15,8 +17,8 @@ const slideIn = (element: HTMLDivElement) => {
     })
     .to(element, {
       delay: 1,
-      width: 0.65 * window.innerWidth,
-      duration: 0.2,
+      width: (1 - 700 / window.innerWidth) * window.innerWidth,
+      duration: 0.8,
       ease: "easeInOut",
     });
 };
@@ -33,7 +35,7 @@ export default function Browser(options: BrowserProps) {
   );
 
   return (
-    <div className="sticky top-2.5" ref={browserContainerElementRef}>
+    <div className="hidden" ref={browserContainerElementRef}>
       <div className="bg-[#111111] max-w-full rounded-lg overflow-hidden border border-stone-800 shadow-lg flex flex-col h-[90vh]">
         {/* Browser Header */}
         <div className="border-b border-stone-800 p-3 flex flex-col space-y-2">

@@ -54,7 +54,6 @@ app.post(
       /*
        * Create new project container
        */
-      console.log("Creating Project");
       const container = await projectManager.createProject();
 
       /*

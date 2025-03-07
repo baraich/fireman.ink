@@ -16,6 +16,8 @@
 > **Cost-Effectiveness**: We are trying to keep the costs as minimal as possible while providing quality to the users using the platform.
 
 ## Roadmap
+- [ ] Project Management CRUD, (main focus, creation and deletion)
+
 - [ ] Integrate an LLM (e.g. Google, Claude or OpenAI) for code generation and suggestions.
 
 - [ ] Comming soon...

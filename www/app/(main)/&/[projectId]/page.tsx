@@ -16,6 +16,7 @@ import { notFound, redirect } from "next/navigation";
  */
 interface ProjectPageProps {
   params: Promise<{ projectId: string }>;
+  searchParams: Promise<{ q: string }>;
 }
 
 /*
@@ -63,14 +64,17 @@ const fetchProject = async (userId: string, projectId: string) => {
  * ProjectPage component displaying project details and interaction UI
  * @param params - Dynamic route parameters including projectId
  */
-export default async function ProjectPage({ params }: ProjectPageProps) {
+export default async function ProjectPage({
+  params,
+  searchParams,
+}: ProjectPageProps) {
   /*
    * Authenticate user and fetch project data
    */
   const user = await authenticateUser();
   const { projectId } = await params;
+  const { q } = await searchParams;
   const project = await fetchProject(user.id, projectId);
-  console.log(project);
 
   return (
     <main className="flex-1 flex flex-col p-4 md:p-8 lg:max-w-screen">
@@ -162,6 +166,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <div className="w-auto bg-[#0d0d0d] rounded-lg p-5 m-5 border border-stone-800 shadow-lg relative">
               <div className="flex items-center">
                 <textarea
+                  defaultValue={q}
                   placeholder="Ask Fireman to create a blog about ..."
                   className="bg-transparent w-full outline-none text-gray-300 resize-none h-24 p-2"
                 />
@@ -188,9 +193,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           {/* Browser Window UI */}
           <div className="hidden xl:block">
             <Browser
-              address={`https://${project.id}.${
-                new URL(process.env.NEXTAUTH_URL!).host
-              }/`}
+              address={
+                process.env.DEV
+                  ? `http://localhost:7680/api/proxy/${project.id}`
+                  : `https://${project.id}.${
+                      new URL(process.env.NEXTAUTH_URL!).host
+                    }/`
+              }
             />
           </div>
         </div>

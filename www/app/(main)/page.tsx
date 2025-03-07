@@ -71,7 +71,7 @@ export default function Home() {
       /*
        * Redirect to new project page
        */
-      router.push(`/&/${projectId}`);
+      router.push(`/&/${projectId}?q=${textAreaContent}`);
     } catch (error) {
       /*
        * Handle errors with appropriate feedback

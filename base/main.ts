@@ -125,6 +125,9 @@ app.post("/api/delete_project", async (request, response) => {
  */
 app.post("/api/send_message", async (request, response) => {
   try {
+    /*
+     * Extract content from request body
+     */
     const { content } = request.body;
     if (!content || typeof content !== "string") {
       response.status(400).json({
@@ -133,26 +136,86 @@ app.post("/api/send_message", async (request, response) => {
       return;
     }
 
-    try {
-      defaultFiremanAgent.subscribe("thinking", response.write);
-      await defaultFiremanAgent.processMessage(content);
-      response.end();
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      response.status(500).json({
-        error: `Failed to process message: ${errorMessage}`,
+    /*
+     * Create a ReadableStream for the thinking process
+     */
+    const stream = new ReadableStream({
+      async start(controller) {
+        let subscriptionActive = true;
+
+        /*
+         * Subscribe to the 'thinking' event and stream updates
+         */
+        defaultFiremanAgent.subscribe("thinking", (thought: string) => {
+          if (subscriptionActive) {
+            controller.enqueue(new TextEncoder().encode(thought));
+          }
+        });
+
+        try {
+          /*
+           * Process the message
+           */
+          await defaultFiremanAgent.processMessage(content);
+        } catch (error) {
+          /*
+           * Handle processing error within the stream
+           */
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error occurred";
+          controller.enqueue(
+            new TextEncoder().encode(`Error: ${errorMessage}\n`)
+          );
+        } finally {
+          /*
+           * Cleanup subscription and close stream
+           */
+          subscriptionActive = false;
+          controller.close();
+        }
+      },
+    });
+
+    /*
+     * Set response headers for streaming
+     */
+    response.setHeader("Content-Type", "text/plain; charset=utf-8");
+    response.setHeader("Transfer-Encoding", "chunked");
+
+    /*
+     * Pipe the stream to the response
+     */
+    stream
+      .pipeTo(
+        new WritableStream({
+          write(chunk) {
+            response.write(chunk);
+          },
+          close() {
+            response.end();
+          },
+          abort(error) {
+            console.error("Stream aborted:", error);
+            response.status(500).send(`Stream error: ${error.message}`);
+          },
+        })
+      )
+      .catch((error) => {
+        console.error("Pipe error:", error);
+        if (!response.headersSent) {
+          response.status(500).send(`Stream error: ${error.message}`);
+        }
       });
-      return;
-    }
   } catch (error) {
-    console.error("Error in send_message:", error);
+    /*
+     * Handle initial setup errors before stream starts
+     */
+    console.error("Error in send_message setup:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    response.status(500).json({
-      error: `Failed to process message: ${errorMessage}`,
-    });
-    return;
+    response
+      .status(500)
+      .json({ error: `Failed to process message: ${errorMessage}` });
   }
 });
 

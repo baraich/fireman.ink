@@ -110,4 +110,13 @@ export class ProjectManager {
       throw error;
     }
   }
+
+  /**
+   * Destroys a Docker container by its container ID
+   */
+  async deleteContainer(containerId: string) {
+    const container = this.docker.getContainer(containerId);
+    await container.stop();
+    await container.remove();
+  }
 }

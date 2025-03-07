@@ -41,6 +41,7 @@ config({ path: ENV_FILE_PATH });
  * Initialize Express application and ProjectManager
  */
 const app = express();
+app.use(express.json());
 const projectManager = new ProjectManager();
 
 /*
@@ -81,6 +82,40 @@ app.post(
     }
   }
 );
+
+/**
+ * Route handler for delete a project
+ * POST /api/delete_project
+ */
+app.post("/api/delete_project", async (request, response) => {
+  try {
+    console.log(request.body);
+    const { containerId } = request.body;
+    if (!containerId || typeof containerId !== "string") {
+      response.status(400).json({
+        message:
+          "Invalid request: containerId is required and must be a string",
+      });
+      return;
+    }
+
+    await projectManager.deleteContainer(containerId);
+    response.json({ ok: true, message: "Container deleted!" });
+  } catch (error) {
+    /*
+     * Handle errors during container deletion
+     */
+    console.error("Error deleting container:", error);
+    const errorMessage =
+      error instanceof Error
+        ? `Failed to delete container: ${error.message}`
+        : "Unknown error occurred while deleting container";
+
+    response.status(500).json({
+      message: errorMessage,
+    });
+  }
+});
 
 /*
  * Route handler for proxying requests to project containers

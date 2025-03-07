@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
  */
 const STATUS_UNAUTHORIZED = 401;
 const STATUS_INTERNAL_ERROR = 500;
-const DEFAULT_PROJECT_NAME = "Laraval";
+const DEFAULT_PROJECT_NAME = "Untitled";
 const DEFAULT_PROJECT_DESCRIPTION = "Laraval Application Boilerplate";
 
 /*

@@ -78,10 +78,10 @@ export default async function ProjectPage({
 
   return (
     <main className="flex-1 flex flex-col p-4 md:p-8 lg:max-w-screen">
-      <div className="max-w-6xl lg:max-w-full lg:min-w-6xl mx-auto w-full">
+      <div className="lg:min-w-6xl mx-auto w-full">
         <div className="flex justify-between gap-4">
           {/* Chat Interface */}
-          <div className="bg-[#111111] rounded-lg border border-stone-800 shadow-lg flex flex-col h-full">
+          <div className="bg-[#111111] max-w-xl rounded-lg border border-stone-800 shadow-lg flex flex-col h-full">
             {/* Messages Container */}
             <div className="flex-1 p-5 overflow-auto">
               <div className="space-y-6">
@@ -191,7 +191,7 @@ export default async function ProjectPage({
           </div>
 
           {/* Browser Window UI */}
-          <div className="hidden xl:block">
+          <div className="hidden xl:block max-h-[85vh]">
             <Browser
               address={
                 process.env.DEV

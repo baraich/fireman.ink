@@ -2,6 +2,7 @@ import { users } from "./users";
 import { sql } from "drizzle-orm";
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
+export type Project = typeof projects.$inferSelect;
 export const projects = pgTable("projects", {
   id: text("id")
     .$default(() => sql`gen_random_uuid()`)

@@ -15,7 +15,7 @@ const slideIn = (element: HTMLDivElement) => {
     })
     .to(element, {
       delay: 1,
-      width: 720,
+      width: 0.65 * window.innerWidth,
       duration: 0.2,
       ease: "easeInOut",
     });
@@ -34,7 +34,7 @@ export default function Browser(options: BrowserProps) {
 
   return (
     <div className="sticky top-2.5" ref={browserContainerElementRef}>
-      <div className="bg-[#111111] rounded-lg overflow-hidden border border-stone-800 shadow-lg flex flex-col h-[90vh]">
+      <div className="bg-[#111111] max-w-full rounded-lg overflow-hidden border border-stone-800 shadow-lg flex flex-col h-[79vh]">
         {/* Browser Header */}
         <div className="border-b border-stone-800 p-3 flex flex-col space-y-2">
           {/* Browser Controls */}

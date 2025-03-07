@@ -1,5 +1,6 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import ProjectCard from "@/components/ProjectCard";
 import { db } from "@/db/drizzle";
 import { projects } from "@/db/schema/projects";
 import { validateAndGetUser } from "@/lib/validateAndGetUser";
@@ -15,7 +16,6 @@ import {
   Filler,
 } from "chart.js";
 import { eq } from "drizzle-orm";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 /*
@@ -36,15 +36,6 @@ ChartJS.register(
  * Constants for routing
  */
 const SIGNIN_PATH = "/signin";
-
-const formatDate = (dateString: Date) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
 
 /*
  * Validates user session and redirects if unauthorized
@@ -133,51 +124,7 @@ export default async function Profile() {
             <h2 className="text-xl font-semibold mb-4">Your Projects</h2>
 
             {projects.map((project) => (
-              <div
-                key={project.id}
-                className="bg-[#1a1a1a] rounded-lg border border-gray-800 overflow-hidden"
-              >
-                <div className="p-5">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-bold text-lg truncate">
-                      {project.name}
-                    </h3>
-                  </div>
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                    {project.description}
-                  </p>
-                  <div className="flex justify-between items-center text-xs text-gray-500">
-                    <span>Created: {formatDate(project.createdAt!)}</span>
-                  </div>
-                </div>
-                <div className="border-t border-gray-800 p-3 flex justify-between items-center">
-                  <Link href={`/&/${project.id}`}>
-                    <button className="px-3 py-1.5 bg-stone-800 cursor-pointer hover:bg-stone-700 rounded text-xs font-medium transition-colors">
-                      Open Editor
-                    </button>
-                  </Link>
-                  <button
-                    className="p-1.5 text-gray-400 hover:text-red-400 rounded transition-colors"
-                    aria-label="Delete project"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 6h18"></path>
-                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
+              <ProjectCard key={project.id} {...project} />
             ))}
           </div>
         )}

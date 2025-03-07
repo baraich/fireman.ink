@@ -134,11 +134,9 @@ app.post("/api/send_message", async (request, response) => {
     }
 
     try {
-      const result = await defaultFiremanAgent.processMessage(content);
-
-      response.status(200).json({
-        message: result,
-      });
+      defaultFiremanAgent.subscribe("thinking", response.write);
+      await defaultFiremanAgent.processMessage(content);
+      response.end();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";

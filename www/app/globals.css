@@ -29,3 +29,11 @@ body {
 .code {
   font-family: "Dank Mono", "IBM Plex Mono", monospace !important;
 }
+
+.animation-delay-75 {
+  animation-delay: 75ms;
+}
+
+.animation-delay-150 {
+  animation-delay: 150ms;
+}

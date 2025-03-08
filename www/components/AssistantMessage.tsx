@@ -77,6 +77,8 @@ export function AssistantMessage({ msg }: { msg: string }) {
       const attributes = parseActionAttributes(attributesString);
 
       // Render the appropriate action component based on type
+      if (attributes.type === "thining") {
+      }
       if (attributes.type === "shell") {
         result.push(
           <ShellAction key={`action-${match.index}`}>

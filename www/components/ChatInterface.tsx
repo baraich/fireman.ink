@@ -212,6 +212,15 @@ export default function ChatInterface({
                   <ToolMessage />
                 </div>
               ) : null}
+              {loading && index === history.length - 1 && (
+                <div className="w-full bg-stone-800 rounded-lg">
+                  <div className="w-full p-6 flex items-center justify-center gap-2 animate-pulse">
+                    <div className="size-4 rounded-full bg-white animate-bounce duration-300"></div>
+                    <div className="size-4 rounded-full bg-white animate-bounce animation-delay-75 duration-300"></div>
+                    <div className="size-4 rounded-full bg-white animate-bounce animation-delay-150 duration-300"></div>
+                  </div>
+                </div>
+              )}
               <div key={index} className="w-full">
                 {message.role === "user" ? (
                   <UserMessage

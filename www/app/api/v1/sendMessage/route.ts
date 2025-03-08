@@ -135,6 +135,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         body: JSON.stringify({
           content: validatedData.content,
           history: validatedData.history,
+          projectId: validatedData.projectId,
         }),
       }
     );

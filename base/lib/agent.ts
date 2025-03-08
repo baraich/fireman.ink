@@ -2,8 +2,9 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { LanguageModelV1, streamText, tool } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
-import { readFile, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import path from "path";
+import { tools } from "./tools";
 
 /**
  * Configuration interface for initializing the FiremanAgent.
@@ -117,7 +118,11 @@ class FiremanAgent {
    * Handles errors gracefully and ensures the agent remains usable.
    * @param message The user's input to process
    */
-  public processMessage(message: string) {
+  public processMessage(
+    message: string,
+    history: { role: "user" | "assistant"; content: string }[],
+    projectId: string
+  ) {
     try {
       return streamText({
         model: this.model,
@@ -130,14 +135,19 @@ class FiremanAgent {
             description: "Allows you to think about your given task.",
             execute: async ({ message }) => await this.think(message),
           }),
+          ...tools,
         },
         messages: [
           {
             role: "system",
-            content: readFileSync(path.join(__dirname, "agent.prompt.file"), {
-              encoding: "utf-8",
-            }),
+            content:
+              readFileSync(path.join(__dirname, "agent.prompt.file"), {
+                encoding: "utf-8",
+              }) +
+              " and your project Id is " +
+              projectId,
           },
+          ...history.slice(-4),
           {
             role: "user",
             content: message,

@@ -7,6 +7,7 @@ import { projects } from "./db/schema/projects";
 import { eq } from "drizzle-orm";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { defaultFiremanAgent } from "./lib/agent";
+import { z } from "zod";
 
 /*
  * Constants for server configuration
@@ -121,15 +122,23 @@ app.post("/api/send_message", async (request, response) => {
     /*
      * Extract content from request body
      */
-    const { content } = request.body;
-    if (!content || typeof content !== "string") {
-      response.status(400).json({
-        error: "Invalid request: content is required and must be a string",
-      });
-      return;
-    }
-
-    const messageRequest = defaultFiremanAgent.processMessage(content);
+    const { content, history, projectId } = z
+      .object({
+        content: z.string(),
+        history: z.array(
+          z.object({
+            role: z.enum(["user", "assistant"]),
+            content: z.string(),
+          })
+        ),
+        projectId: z.string(),
+      })
+      .parse(request.body);
+    const messageRequest = defaultFiremanAgent.processMessage(
+      content,
+      history as { role: "user" | "assistant"; content: string }[],
+      projectId
+    );
 
     /*
      * Set response headers for streaming

@@ -207,9 +207,13 @@ export default function ChatInterface({
       >
         <div className="space-y-6 w-full">
           {history.map((message, index) => (
-            <div key={index} className="w-full">
-              <>
-                {index === 2 ? <ToolMessage /> : null}
+            <>
+              {index === 2 ? (
+                <div className="w-full">
+                  <ToolMessage />
+                </div>
+              ) : null}
+              <div key={index} className="w-full">
                 {message.role === "user" ? (
                   <UserMessage
                     key={index}
@@ -219,8 +223,8 @@ export default function ChatInterface({
                 ) : (
                   <AssistantMessage key={index} msg={message.content} />
                 )}
-              </>
-            </div>
+              </div>
+            </>
           ))}
         </div>
       </div>

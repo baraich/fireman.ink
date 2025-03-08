@@ -88,7 +88,7 @@ async function fetchProjectMessagesOrIfNoneUpsert(message: MessageInsert) {
      * If no messages exist, start new conversation
      */
     if (conversation.length === 0) {
-      const newMessages = await db
+      await db
         .insert(messages)
         .values({
           type: message.type,
@@ -98,7 +98,7 @@ async function fetchProjectMessagesOrIfNoneUpsert(message: MessageInsert) {
         })
         .returning();
 
-      return { messages: newMessages, newConversation: true };
+      return { messages: [], newConversation: true };
     }
 
     return { messages: conversation, newConversation: false };

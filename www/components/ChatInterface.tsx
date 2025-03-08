@@ -5,21 +5,17 @@ import { useEffect, useRef, useState } from "react";
 import { UserMessage } from "./UserMessage";
 import { AssistantMessage } from "./AssistantMessage";
 import Script from "next/script";
-
+import { ToolMessage } from "./ToolMessage";
 import hljs from "highlight.js/lib/core";
 import php from "highlight.js/lib/languages/php";
+// eslint-disable-next-line
+// @ts-ignore
+import blade from "highlightjs-blade";
 import properties from "highlight.js/lib/languages/properties";
-import "highlight.js/styles/vs2015.css";
-import { ToolMessage } from "./ToolMessage";
+import "highlight.js/styles/agate.css";
 
-/*
- * Constants from W3C SVG namespace specification
- */
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
-/*
- * Interface for ChatInterface component props
- */
 interface ChatInterfaceProps {
   messages: Message[];
   initials: string;
@@ -29,18 +25,11 @@ interface ChatInterfaceProps {
   newConversation: boolean;
 }
 
-/*
- * Interface for chat history entry
- */
 interface ChatHistoryEntry {
   role: "user" | "assistant";
   content: string;
 }
 
-/*
- * ChatInterface component for displaying and managing project chat
- * @param props - Properties including messages and user data
- */
 export default function ChatInterface({
   messages: initialMessages,
   initials,
@@ -49,46 +38,35 @@ export default function ChatInterface({
   newConversation,
   q,
 }: ChatInterfaceProps) {
-  /*
-   * State management for chat input and loading status
-   */
   const [textAreaValue, setTextAreaValue] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [history, setHistory] = useState<ChatHistoryEntry[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isAutoScrollingRef = useRef<boolean>(true);
 
-  useEffect(function () {
+  // Register languages for syntax highlighting
+  useEffect(() => {
     hljs.registerLanguage("php", php);
+    hljs.registerLanguage("blade", blade);
     hljs.registerLanguage("properties", properties);
   }, []);
 
-  /*
-   * Sends a message to the server
-   * @param msg - Message content to send
-   */
+  // Function to send a message
   const sendMessage = async (msg: string) => {
-    if (!msg.trim()) return;
-    if (loading) return;
+    if (!msg.trim() || loading) return;
 
     setTextAreaValue("");
     setLoading(true);
     isAutoScrollingRef.current = true;
 
     try {
-      /*
-       * Update history immediately with user message
-       */
+      // Update history with user message
       setHistory((prev) => [...prev, { role: "user", content: msg }]);
 
-      /*
-       * Send message to API endpoint with streaming response
-       */
+      // Send message to API endpoint
       const response = await fetch("/api/v1/sendMessage", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           projectId,
           new: history.length <= 1,
@@ -102,17 +80,13 @@ export default function ChatInterface({
         throw new Error(`Failed to send message: ${response.statusText}`);
       }
 
-      /*
-       * Handle streamed response
-       */
+      // Handle streamed response
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error("Response body is not readable");
       }
 
       let assistantMessage = "";
-
-      // Add initial empty assistant message
       setHistory((prev) => [...prev, { role: "assistant", content: "" }]);
 
       while (true) {
@@ -122,7 +96,7 @@ export default function ChatInterface({
         const chunk = new TextDecoder().decode(value);
         assistantMessage += chunk;
 
-        // Update only the content of the last message (which is the assistant's)
+        // Update only the content of the last message
         setHistory((prev) => {
           const newHistory = [...prev];
           if (
@@ -141,51 +115,40 @@ export default function ChatInterface({
     }
   };
 
-  /*
-   * Effect to initialize history and handle new conversations
-   */
+  // Initialize history and handle new conversations
   useEffect(() => {
-    /*
-     * Populate initial history from messages
-     */
     const newHistory = initialMessages.map((msg) => ({
       role: msg.type === "user" ? "user" : "assistant",
       content: msg.content,
     }));
+
     setHistory(newHistory as typeof history);
-    /*
-     * Start new conversation if applicable
-     */
+
     if (newHistory.length <= 1 && q) {
       sendMessage(q);
     }
     // eslint-disable-next-line
   }, [initialMessages, newConversation, q]);
 
-  // Smooth scrolling effect that runs when history changes
+  // Smooth scrolling effect
   useEffect(() => {
     if (!messagesContainerRef.current || !isAutoScrollingRef.current) return;
 
     const scrollContainer = messagesContainerRef.current;
-    const scrollToBottom = () => {
-      scrollContainer.scrollTo({
-        top: scrollContainer.scrollHeight,
-        behavior: "smooth",
-      });
-    };
-
-    scrollToBottom();
+    scrollContainer.scrollTo({
+      top: scrollContainer.scrollHeight,
+      behavior: "smooth",
+    });
   }, [history]);
 
-  // Detect user scroll to disable auto-scrolling when user scrolls up
+  // Detect user scroll
   useEffect(() => {
     const handleScroll = () => {
       if (!messagesContainerRef.current) return;
 
       const { scrollTop, scrollHeight, clientHeight } =
         messagesContainerRef.current;
-      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100; // Within 100px of bottom
-
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
       isAutoScrollingRef.current = isAtBottom;
     };
 
@@ -199,6 +162,7 @@ export default function ChatInterface({
   return (
     <div className="bg-[#111111] min-w-xl w-full rounded-lg border border-stone-800 shadow-lg flex flex-col h-full">
       <Script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></Script>
+
       {/* Messages Container */}
       <div
         ref={messagesContainerRef}
@@ -206,12 +170,11 @@ export default function ChatInterface({
       >
         <div className="space-y-6 w-full">
           {history.map((message, index) => (
-            <>
-              {index === 2 ? (
-                <div className="w-full">
-                  <ToolMessage />
-                </div>
-              ) : null}
+            <div key={index} className="w-full">
+              {/* Insert ToolMessage at specific position if needed */}
+              {index === 2 && <ToolMessage />}
+
+              {/* Show loading indicator */}
               {loading && index === history.length - 1 && (
                 <div className="w-full bg-stone-800 rounded-lg">
                   <div className="w-full p-6 flex items-center justify-center gap-2 animate-pulse">
@@ -221,18 +184,14 @@ export default function ChatInterface({
                   </div>
                 </div>
               )}
-              <div key={index} className="w-full">
-                {message.role === "user" ? (
-                  <UserMessage
-                    key={index}
-                    initials={initials}
-                    msg={message.content}
-                  />
-                ) : (
-                  <AssistantMessage key={index} msg={message.content} />
-                )}
-              </div>
-            </>
+
+              {/* Render appropriate message component */}
+              {message.role === "user" ? (
+                <UserMessage initials={initials} msg={message.content} />
+              ) : (
+                <AssistantMessage msg={message.content} />
+              )}
+            </div>
           ))}
         </div>
       </div>

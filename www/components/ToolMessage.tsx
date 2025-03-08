@@ -3,7 +3,7 @@ import {
   ChevronDown,
   ChevronsLeftRightEllipsisIcon,
 } from "lucide-react";
-import ShellAction from "./ShellAction";
+import { ShellCommandBlock } from "./ShellCommand";
 
 /*
  * ToolMessage component for displaying tool execution steps
@@ -41,7 +41,7 @@ export function ToolMessage() {
                 <p>Starting Server</p>
               </div>
               <div>
-                <ShellAction>php artisan serve</ShellAction>
+                <ShellCommandBlock content="php artisan serve" />
               </div>
             </div>
           </li>

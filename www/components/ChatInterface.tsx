@@ -1,9 +1,16 @@
 "use client";
 import { Message } from "@/db/schema/messages";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import Prism from "prismjs";
-import Markdown from "react-markdown";
+import { useEffect, useRef, useState } from "react";
+import { UserMessage } from "./UserMessage";
+import { AssistantMessage } from "./AssistantMessage";
+import Script from "next/script";
+
+import hljs from "highlight.js/lib/core";
+import php from "highlight.js/lib/languages/php";
+import properties from "highlight.js/lib/languages/properties";
+import "highlight.js/styles/vs2015.css";
+import { ToolMessage } from "./ToolMessage";
 
 /*
  * Constants from W3C SVG namespace specification
@@ -48,22 +55,32 @@ export default function ChatInterface({
   const [textAreaValue, setTextAreaValue] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [history, setHistory] = useState<ChatHistoryEntry[]>([]);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const isAutoScrollingRef = useRef<boolean>(true);
 
-  /*
-   * Sends a message to the server
-   * @param msg - Message content to send
-   */
+  useEffect(function () {
+    hljs.registerLanguage("php", php);
+    hljs.registerLanguage("properties", properties);
+  }, []);
+
   /*
    * Sends a message to the server
    * @param msg - Message content to send
    */
   const sendMessage = async (msg: string) => {
     if (!msg.trim()) return;
+    if (loading) return;
 
     setTextAreaValue("");
     setLoading(true);
+    isAutoScrollingRef.current = true;
 
     try {
+      /*
+       * Update history immediately with user message
+       */
+      setHistory((prev) => [...prev, { role: "user", content: msg }]);
+
       /*
        * Send message to API endpoint with streaming response
        */
@@ -74,7 +91,7 @@ export default function ChatInterface({
         },
         body: JSON.stringify({
           projectId,
-          new: initialMessages.length <= 1,
+          new: history.length <= 1,
           userId,
           content: msg,
           history,
@@ -94,6 +111,10 @@ export default function ChatInterface({
       }
 
       let assistantMessage = "";
+
+      // Add initial empty assistant message
+      setHistory((prev) => [...prev, { role: "assistant", content: "" }]);
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -101,43 +122,20 @@ export default function ChatInterface({
         const chunk = new TextDecoder().decode(value);
         assistantMessage += chunk;
 
+        // Update only the content of the last message (which is the assistant's)
         setHistory((prev) => {
-          const lastMessage = prev[prev.length - 1];
-          if (lastMessage?.role === "assistant") {
-            return [
-              ...prev.slice(0, -1),
-              { role: "assistant", content: assistantMessage },
-            ];
+          const newHistory = [...prev];
+          if (
+            newHistory.length > 0 &&
+            newHistory[newHistory.length - 1].role === "assistant"
+          ) {
+            newHistory[newHistory.length - 1].content = assistantMessage;
           }
-          return initialMessages.length <= 1
-            ? [...prev, { role: "assistant", content: chunk }]
-            : [
-                ...prev,
-                { role: "user", content: msg },
-                { role: "assistant", content: chunk },
-              ];
+          return newHistory;
         });
       }
-
-      /*
-       * Ensure final message is complete
-       */
-      setHistory((prev) => {
-        const lastMessage = prev[prev.length - 1];
-        if (
-          lastMessage?.role === "assistant" &&
-          lastMessage.content !== assistantMessage
-        ) {
-          return [
-            ...prev.slice(0, -1),
-            { role: "assistant", content: assistantMessage },
-          ];
-        }
-        return prev;
-      });
     } catch (error) {
       console.error("Error sending message:", error);
-      setHistory((prev) => [...prev, { role: "user", content: msg }]);
     } finally {
       setLoading(false);
     }
@@ -159,49 +157,69 @@ export default function ChatInterface({
     /*
      * Start new conversation if applicable
      */
-    if (newConversation && q) {
+    if (history.length <= 1 && q) {
       sendMessage(q);
     }
     // eslint-disable-next-line
   }, [initialMessages, newConversation, q]);
 
-  useEffect(
-    function () {
-      try {
-        const preTags = document.getElementsByTagName("pre");
-        const codeBlocks = document.getElementsByTagName("code");
-        [...codeBlocks].forEach((codeBlock) => {
-          const hasClass = codeBlock.getAttribute("class");
-          codeBlock.parentElement?.setAttribute(
-            "class",
-            hasClass ? hasClass : ""
-          );
-        });
+  // Smooth scrolling effect that runs when history changes
+  useEffect(() => {
+    if (!messagesContainerRef.current || !isAutoScrollingRef.current) return;
 
-        [...preTags].forEach((preTag) => {
-          preTag.style.marginLeft = "30px";
-        });
+    const scrollContainer = messagesContainerRef.current;
+    const scrollToBottom = () => {
+      scrollContainer.scrollTo({
+        top: scrollContainer.scrollHeight,
+        behavior: "smooth",
+      });
+    };
 
-        Prism.highlightAll();
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    [initialMessages, history]
-  );
+    scrollToBottom();
+  }, [history]);
+
+  // Detect user scroll to disable auto-scrolling when user scrolls up
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!messagesContainerRef.current) return;
+
+      const { scrollTop, scrollHeight, clientHeight } =
+        messagesContainerRef.current;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100; // Within 100px of bottom
+
+      isAutoScrollingRef.current = isAtBottom;
+    };
+
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
 
   return (
     <div className="bg-[#111111] min-w-xl w-full rounded-lg border border-stone-800 shadow-lg flex flex-col h-full">
+      <Script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></Script>
       {/* Messages Container */}
-      <div className="flex-1 p-5 overflow-auto w-full">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 p-5 overflow-auto w-full"
+      >
         <div className="space-y-6 w-full">
           {history.map((message, index) => (
             <div key={index} className="w-full">
-              {message.role === "user" ? (
-                <UserMessage initials={initials} msg={message.content} />
-              ) : (
-                <AssistantMessage msg={message.content} />
-              )}
+              <>
+                {index === 2 ? <ToolMessage /> : null}
+                {message.role === "user" ? (
+                  <UserMessage
+                    key={index}
+                    initials={initials}
+                    msg={message.content}
+                  />
+                ) : (
+                  <AssistantMessage key={index} msg={message.content} />
+                )}
+              </>
             </div>
           ))}
         </div>
@@ -216,6 +234,12 @@ export default function ChatInterface({
             onChange={(e) => setTextAreaValue(e.target.value)}
             placeholder="Ask Fireman ..."
             className="bg-transparent w-full outline-none text-gray-300 resize-none h-24 p-2 disabled:opacity-50"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage(textAreaValue);
+              }
+            }}
           />
           <button
             onClick={() => sendMessage(textAreaValue)}
@@ -246,87 +270,3 @@ export default function ChatInterface({
     </div>
   );
 }
-
-/*
- * UserMessage component for displaying user messages
- * @param initials - User's initials for avatar
- * @param msg - Message content
- */
-function UserMessage({ initials, msg }: { initials: string; msg: string }) {
-  return (
-    <div className="bg-[#0d0d0d] rounded-lg p-4 border border-stone-800">
-      <div className="flex items-center p-2">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 via-green-500 to-purple-500 flex items-center justify-center mr-3">
-          <span className="text-white font-bold">{initials}</span>
-        </div>
-        <p className="text-gray-300 font-medium leading-7">{msg}</p>
-      </div>
-    </div>
-  );
-}
-
-/*
- * AssistantMessage component for displaying assistant responses
- * @param msg - Message content
- */
-function AssistantMessage({ msg }: { msg: string }) {
-  return (
-    <div className="bg-[#161616] w-full rounded-lg p-6 border border-stone-800">
-      <div className="flex items-center p-3 -mb-4">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-blue-500 flex items-center justify-center mr-4">
-          <span className="text-white font-bold">A</span>
-        </div>
-        <p className="text-gray-300 font-medium">Fireman</p>
-      </div>
-      <div className="px-4 py-3 w-full text-white leading-8 prose prose-invert max-w-none prose-pre:my-6 prose-pre:mx-0 prose-pre:bg-[#1a1a1a] prose-pre:rounded-md prose-pre:p-5 prose-code:text-blue-300 prose-p:my-5 prose-headings:mb-6 prose-headings:mt-8 prose-li:my-3 prose-ul:pl-8 prose-ol:pl-8 prose-blockquote:border-l-4 prose-blockquote:pl-5 prose-blockquote:my-6">
-        <Markdown>{msg}</Markdown>
-      </div>
-    </div>
-  );
-}
-
-/*
- * ToolMessage component for displaying tool execution steps
- */
-// function ToolMessage() {
-//   return (
-//     <div className="bg-stone-950 rounded-lg border border-stone-800 overflow-x-hidden">
-//       {/* Tool Header */}
-//       <div className="w-full border-b h-auto flex justify-between border-stone-800">
-//         <p className="font-medium p-8 text-lg">Create Todo Application</p>
-//         <div className="h-auto w-24 flex items-center hover:bg-stone-900 justify-center border-l-2 cursor-pointer border-stone-800">
-//           <ChevronDown className="size-7" />
-//         </div>
-//       </div>
-
-//       {/* Tool Content */}
-//       <div className="p-8">
-//         <ul className="space-y-4">
-//           <li>
-//             <div className="flex gap-2">
-//               <Check className="text-teal-600 w-5 h-5" />
-//               <span>Create Initial Files</span>
-//             </div>
-//           </li>
-//           <li>
-//             <div className="flex gap-2">
-//               <Check className="text-teal-600 w-5 h-5" />
-//               <span>Install Dependencies</span>
-//             </div>
-//           </li>
-//           <li>
-//             <div className="flex gap-2 flex-col">
-//               <div className="flex gap-2">
-//                 <ChevronsLeftRightEllipsisIcon className="text-blue-300 w-5 h-5" />
-//                 <p>Starting Server</p>
-//               </div>
-//               <div>
-//                 <CodeBlock language="properties" code="php artisan serve" />
-//               </div>
-//             </div>
-//           </li>
-//         </ul>
-//       </div>
-//     </div>
-//   );
-// }

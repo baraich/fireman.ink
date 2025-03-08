@@ -6,7 +6,6 @@ import { validateAndGetUser } from "@/lib/validateAndGetUser";
 import { and, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { toast } from "sonner";
-import "./_css/code.css";
 import ChatIntefaceLoader from "@/components/ChatInterfaceLoader";
 
 /*

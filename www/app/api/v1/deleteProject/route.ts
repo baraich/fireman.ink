@@ -1,4 +1,5 @@
 import { db } from "@/db/drizzle";
+import { messages } from "@/db/schema/messages";
 import { projects } from "@/db/schema/projects";
 import { validateAndGetUser } from "@/lib/validateAndGetUser";
 import { and, eq } from "drizzle-orm";
@@ -82,6 +83,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       throw new Error(`Worker failed with status: ${workerResponse.status}`);
     }
 
+    await db.delete(messages).where(eq(messages.projectId, project.id));
     /**
      * Remove the project from the database.
      */

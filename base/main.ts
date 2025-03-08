@@ -6,7 +6,7 @@ import { db } from "./db/drizzle";
 import { projects } from "./db/schema/projects";
 import { eq } from "drizzle-orm";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { defaultFiremanAgent } from "./lib/completition";
+import { defaultFiremanAgent } from "./lib/agent";
 
 /*
  * Constants for server configuration
@@ -129,54 +129,7 @@ app.post("/api/send_message", async (request, response) => {
       return;
     }
 
-    /*
-     * Create a ReadableStream for the thinking process
-     */
-    const stream = new ReadableStream({
-      async start(controller) {
-        let subscriptionActive = true;
-
-        /*
-         * Subscribe to the 'thinking' event and stream updates
-         */
-        defaultFiremanAgent.subscribe("thinking", (thought: string) => {
-          try {
-            if (
-              subscriptionActive &&
-              controller &&
-              controller.desiredSize !== null
-            ) {
-              controller.enqueue(new TextEncoder().encode(thought));
-            }
-          } catch (error) {
-            console.log(error);
-            controller.close();
-          }
-        });
-
-        try {
-          /*
-           * Process the message
-           */
-          await defaultFiremanAgent.processMessage(content);
-        } catch (error) {
-          /*
-           * Handle processing error within the stream
-           */
-          const errorMessage =
-            error instanceof Error ? error.message : "Unknown error occurred";
-          controller.enqueue(
-            new TextEncoder().encode(`Error: ${errorMessage}\n`)
-          );
-        } finally {
-          /*
-           * Cleanup subscription and close stream
-           */
-          subscriptionActive = false;
-          controller.close();
-        }
-      },
-    });
+    const messageRequest = defaultFiremanAgent.processMessage(content);
 
     /*
      * Set response headers for streaming
@@ -184,30 +137,16 @@ app.post("/api/send_message", async (request, response) => {
     response.setHeader("Content-Type", "text/plain; charset=utf-8");
     response.setHeader("Transfer-Encoding", "chunked");
 
-    /*
-     * Pipe the stream to the response
-     */
-    stream
-      .pipeTo(
-        new WritableStream({
-          write(chunk) {
-            response.write(chunk);
-          },
-          close() {
-            response.end();
-          },
-          abort(error) {
-            console.error("Stream aborted:", error);
-            response.status(500).send(`Stream error: ${error.message}`);
-          },
-        })
-      )
-      .catch((error) => {
-        console.error("Pipe error:", error);
-        if (!response.headersSent) {
-          response.status(500).send(`Stream error: ${error.message}`);
-        }
-      });
+    messageRequest.textStream.pipeTo(
+      new WritableStream({
+        write(chunk) {
+          response.write(chunk);
+        },
+        close() {
+          response.end();
+        },
+      })
+    );
   } catch (error) {
     /*
      * Handle initial setup errors before stream starts

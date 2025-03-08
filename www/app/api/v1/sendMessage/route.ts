@@ -31,15 +31,18 @@ const SEND_MESSAGE_ENDPOINT = "/api/send_message";
  * @param projectId - Project ID for the message
  * @param userId - User ID for the message
  * @param userContent - Original user message content
+ * @param isNewConversation - Whether this is a new conversation
  * @returns TransformStream that processes the worker response
  */
 const createMessageSaverStream = (
   projectId: string,
   userId: string,
   userContent: string,
-  saveUser: boolean
+  isNewConversation: boolean
 ) => {
   let fullResponse = "";
+  // Flag to ensure we only save messages once
+  let messagesSaved = false;
 
   return new TransformStream({
     transform(chunk, controller) {
@@ -52,33 +55,27 @@ const createMessageSaverStream = (
     async flush() {
       /*
        * Save both user and assistant messages to database when stream closes
+       * Only if they haven't been saved already
        */
+      if (messagesSaved) {
+        console.log("Messages already saved, skipping duplicate save");
+        return;
+      }
+
       try {
-        await db.insert(messages).values(
-          saveUser
-            ? [
-                {
-                  projectId,
-                  userId,
-                  type: "user",
-                  content: userContent,
-                },
-                {
-                  projectId,
-                  userId,
-                  type: "assistant",
-                  content: fullResponse,
-                },
-              ]
-            : [
-                {
-                  projectId,
-                  userId,
-                  type: "assistant",
-                  content: fullResponse,
-                },
-              ]
-        );
+        // For new conversations, save both the user and assistant messages
+        // For existing conversations, only save the assistant message
+        // The user message is already saved from previous messages
+
+        await db.insert(messages).values({
+          projectId,
+          userId,
+          type: "assistant",
+          content: fullResponse,
+        });
+
+        messagesSaved = true;
+        console.log("Messages saved successfully");
       } catch (error) {
         console.error("Error saving messages to database:", error);
       }
@@ -98,13 +95,36 @@ export async function POST(request: Request): Promise<NextResponse> {
      */
     const body = await request.json();
     const validatedData = sendMessageSchema.parse(body);
-    const { projectId, userId, content } = validatedData;
+    const {
+      projectId,
+      userId,
+      content,
+      new: isNewConversation,
+    } = validatedData;
 
     /*
      * Validate worker URL configuration
      */
     if (!WORKER_URL) {
       throw new Error("INTERNAL_WORKER_URL is not configured");
+    }
+
+    /*
+     * Save user message immediately for existing conversations
+     * For new conversations, we'll save both messages together after getting the response
+     */
+    if (!isNewConversation) {
+      try {
+        await db.insert(messages).values({
+          projectId,
+          userId,
+          type: "user",
+          content,
+        });
+        console.log("User message saved successfully");
+      } catch (error) {
+        console.error("Error saving user message to database:", error);
+      }
     }
 
     /*
@@ -141,12 +161,14 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     /*
      * Pipe the stream through our message saver
+     * For new conversations, we'll save both the user and assistant messages
+     * For existing conversations, we only save the assistant message (user message already saved above)
      */
     const messageSaverStream = createMessageSaverStream(
       projectId,
       userId,
       content,
-      !validatedData.new
+      isNewConversation
     );
     const finalStream = stream.pipeThrough(messageSaverStream);
 

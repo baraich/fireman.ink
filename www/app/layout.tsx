@@ -24,9 +24,6 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <head>
-        <script defer async src="/prism-php.min.js"></script>
-      </head>
       <body className={`${poppins.className} antialiased`}>
         {children}
         <Toaster />

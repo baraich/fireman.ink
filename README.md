@@ -32,4 +32,4 @@ We welcome contributions! To get started:
 5. Open a Pull Request.
 
 ## Licensing
-> The licensing is yet to be determined, however you are not allowed to distribute or sell this software in any manner without the prior permission from the authors.
+> Apache License, Version 2.0.

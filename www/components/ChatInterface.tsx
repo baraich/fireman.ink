@@ -153,11 +153,10 @@ export default function ChatInterface({
       content: msg.content,
     }));
     setHistory(newHistory as typeof history);
-
     /*
      * Start new conversation if applicable
      */
-    if (history.length <= 1 && q) {
+    if (newHistory.length <= 1 && q) {
       sendMessage(q);
     }
     // eslint-disable-next-line

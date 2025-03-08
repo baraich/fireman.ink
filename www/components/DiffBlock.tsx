@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { MessagePartProps } from "./MessagePart";
 import hljs from "highlight.js";
-import "highlight.js/styles/vs2015.css";
 
 export function DiffBlock({
   content,

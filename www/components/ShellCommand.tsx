@@ -3,7 +3,6 @@ import { useState } from "react";
 import { MessagePartProps } from "./MessagePart";
 import { Clipboard, ClipboardCheck } from "lucide-react";
 import hljs from "highlight.js";
-import "highlight.js/styles/vs2015.css";
 
 export function ShellCommandBlock({
   content,

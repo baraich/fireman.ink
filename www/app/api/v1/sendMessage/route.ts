@@ -34,12 +34,7 @@ const SEND_MESSAGE_ENDPOINT = "/api/send_message";
  * @param isNewConversation - Whether this is a new conversation
  * @returns TransformStream that processes the worker response
  */
-const createMessageSaverStream = (
-  projectId: string,
-  userId: string,
-  userContent: string,
-  isNewConversation: boolean
-) => {
+const createMessageSaverStream = (projectId: string, userId: string) => {
   let fullResponse = "";
   // Flag to ensure we only save messages once
   let messagesSaved = false;
@@ -164,12 +159,7 @@ export async function POST(request: Request): Promise<NextResponse> {
      * For new conversations, we'll save both the user and assistant messages
      * For existing conversations, we only save the assistant message (user message already saved above)
      */
-    const messageSaverStream = createMessageSaverStream(
-      projectId,
-      userId,
-      content,
-      isNewConversation
-    );
+    const messageSaverStream = createMessageSaverStream(projectId, userId);
     const finalStream = stream.pipeThrough(messageSaverStream);
 
     /*
